@@ -26,6 +26,10 @@ jobs:
       # cargo's own metadata, and an override makes the two disagree — the build
       # succeeds and then reports "No artifacts were found".
       - name: Use the default target directory
+        # Explicit bash so the step behaves the same if this workflow ever grows
+        # a Windows leg: PowerShell aliases `rm` to Remove-Item, where `-f` is
+        # ambiguous between -Filter and -Force.
+        shell: bash
         run: rm -f src-tauri/.cargo/config.toml
 
 
