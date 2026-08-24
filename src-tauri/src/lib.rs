@@ -11,9 +11,10 @@ mod suite;
 
 use std::sync::Mutex;
 
+// All three are only reachable from the macOS-only open-document handler, so
+// they'd be unused imports anywhere else.
 #[cfg(target_os = "macos")]
-use tauri::{Emitter, RunEvent};
-use tauri::Manager;
+use tauri::{Emitter, Manager, RunEvent};
 
 /// Files Finder asked us to open before the webview was ready.
 ///

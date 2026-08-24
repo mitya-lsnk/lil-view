@@ -110,22 +110,26 @@ export default function App() {
   // Files handed to us by Finder. The buffer is drained first because a cold
   // double-click delivers the path before React has mounted; the listener then
   // covers every later open while the app stays running.
+  // `load` closes over the sort preferences, and this subscription is set up
+  // once — through a ref so a file opened from Finder after the order was
+  // changed still uses the current one. Re-subscribing on every change would
+  // drop events in the gap between unlisten and listen.
+  const loadRef = useRef(load);
+  loadRef.current = load;
+
   useEffect(() => {
     if (!hasTauri()) return;
     takePendingOpen()
       .then((paths) => {
-        if (paths.length) void load(paths[0]);
+        if (paths.length) void loadRef.current(paths[0]);
       })
       .catch(() => {});
     const un = listen<string[]>("open-files", (e) => {
-      if (e.payload.length) void load(e.payload[0]);
+      if (e.payload.length) void loadRef.current(e.payload[0]);
     });
     return () => {
       void un.then((f) => f());
     };
-    // Intentionally mount-only: re-subscribing on every prefs change would drop
-    // events in the gap between unlisten and listen.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Which sibling apps are installed. Looked up once at startup and again each
@@ -175,7 +179,7 @@ export default function App() {
     const around = [index - 2, index - 1, index + 1, index + 2]
       .filter((i) => i >= 0 && i < entries.length)
       .map((i) => entries[i].path);
-    return preload(around);
+    preload(around);
   }, [entries, index]);
 
   // -------------------------------------------------------------- slideshow
@@ -310,10 +314,17 @@ export default function App() {
       filters: [{ name: "Image", extensions: ["jpg", "png", "tiff", "heic", "gif", "bmp"] }],
     });
     if (typeof dest !== "string") return;
-    const ext = dest.slice(dest.lastIndexOf(".") + 1);
+    // Read the extension off the file name, never off the whole path: a dot in
+    // a parent directory would otherwise be taken for the format. A name typed
+    // without any extension gets the default rather than being handed to Rust
+    // as an unrecognised one.
+    const destName = splitPath(dest).name;
+    const dot = destName.lastIndexOf(".");
+    const ext = dot > 0 ? destName.slice(dot + 1) : "jpg";
+    const target = dot > 0 ? dest : `${dest}.jpg`;
     try {
-      await saveAs(current.path, dest, ext, 92);
-      say(s.actions.saved(splitPath(dest).name));
+      await saveAs(current.path, target, ext, 92);
+      say(s.actions.saved(splitPath(target).name));
     } catch (e) {
       say(String(e), "error");
     }

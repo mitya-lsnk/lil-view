@@ -16,7 +16,7 @@
 
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::UNIX_EPOCH;
 
 use percent_encoding::percent_decode_str;
@@ -49,15 +49,20 @@ fn mime_for(ext: &str) -> &'static str {
 /// folder of RAWs doesn't grow the process without bound.
 const CACHE_BUDGET: usize = 256 * 1024 * 1024;
 
+/// A cached frame. Behind an `Arc` so a hit hands out a refcount bump rather
+/// than copying megabytes while the lock is held — the grid fires a request per
+/// visible thumbnail, and those all queue on this one mutex.
+type Frame = (Arc<Vec<u8>>, &'static str);
+
 struct Cache {
-    map: HashMap<String, (Vec<u8>, &'static str)>,
+    map: HashMap<String, Frame>,
     /// Least-recently-used first.
     order: Vec<String>,
     bytes: usize,
 }
 
 impl Cache {
-    fn get(&mut self, k: &str) -> Option<(Vec<u8>, &'static str)> {
+    fn get(&mut self, k: &str) -> Option<Frame> {
         let hit = self.map.get(k)?.clone();
         if let Some(i) = self.order.iter().position(|x| x == k) {
             let k = self.order.remove(i);
@@ -66,17 +71,20 @@ impl Cache {
         Some(hit)
     }
 
-    fn put(&mut self, k: String, v: Vec<u8>, mime: &'static str) {
+    fn put(&mut self, k: String, v: Arc<Vec<u8>>, mime: &'static str) {
         // A single frame larger than the whole budget would evict everything and
         // then itself — serve it, but don't try to keep it.
         if v.len() > CACHE_BUDGET {
             return;
         }
         if let Some((old, _)) = self.map.remove(&k) {
-            self.bytes -= old.len();
+            // Saturating throughout: the byte count is bookkeeping, and if it
+            // ever drifts it should cost an early eviction, not a panic on the
+            // thread serving an image.
+            self.bytes = self.bytes.saturating_sub(old.len());
             self.order.retain(|x| x != &k);
         }
-        self.bytes += v.len();
+        self.bytes = self.bytes.saturating_add(v.len());
         self.map.insert(k.clone(), (v, mime));
         self.order.push(k);
         while self.bytes > CACHE_BUDGET {
@@ -85,7 +93,7 @@ impl Cache {
             };
             self.order.remove(0);
             if let Some((v, _)) = self.map.remove(&oldest) {
-                self.bytes -= v.len();
+                self.bytes = self.bytes.saturating_sub(v.len());
             }
         }
     }
@@ -216,14 +224,19 @@ pub fn handle<R: Runtime>(
             path.display()
         );
 
-        if let Some((bytes, mime)) = cache().lock().unwrap().get(&key) {
-            return respond(responder, 200, mime, bytes);
+        // Scoped so the lock is dropped before the body is copied: the response
+        // has to own a plain Vec, and that copy must not block the other
+        // threads waiting to look something up.
+        let hit = cache().lock().unwrap().get(&key);
+        if let Some((bytes, mime)) = hit {
+            return respond(responder, 200, mime, bytes.to_vec());
         }
 
         match decode(path, size, thumb) {
             Ok((bytes, mime)) => {
-                cache().lock().unwrap().put(key, bytes.clone(), mime);
-                respond(responder, 200, mime, bytes)
+                let bytes = Arc::new(bytes);
+                cache().lock().unwrap().put(key, Arc::clone(&bytes), mime);
+                respond(responder, 200, mime, bytes.to_vec())
             }
             Err(e) => fail(responder, 415, e),
         }
@@ -276,8 +289,8 @@ mod tests {
             bytes: 0,
         };
         let chunk = CACHE_BUDGET / 2 + 1;
-        c.put("a".into(), vec![0; chunk], "image/png");
-        c.put("b".into(), vec![0; chunk], "image/png");
+        c.put("a".into(), Arc::new(vec![0; chunk]), "image/png");
+        c.put("b".into(), Arc::new(vec![0; chunk]), "image/png");
         assert!(c.map.contains_key("b"));
         assert!(!c.map.contains_key("a"), "oldest entry should be evicted");
         assert!(c.bytes <= CACHE_BUDGET);
@@ -290,8 +303,8 @@ mod tests {
             order: Vec::new(),
             bytes: 0,
         };
-        c.put("a".into(), vec![0; 10], "image/png");
-        c.put("b".into(), vec![0; 10], "image/png");
+        c.put("a".into(), Arc::new(vec![0; 10]), "image/png");
+        c.put("b".into(), Arc::new(vec![0; 10]), "image/png");
         c.get("a").unwrap();
         assert_eq!(c.order, vec!["b".to_string(), "a".to_string()]);
     }

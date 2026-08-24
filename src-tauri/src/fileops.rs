@@ -7,10 +7,15 @@
 use std::path::{Path, PathBuf};
 
 /// `/a/b/photo.jpg` + an occupied slot → `/a/b/photo 2.jpg`, then `photo 3.jpg`…
-fn free_name(dir: &Path, file_name: &str) -> PathBuf {
+///
+/// `None` when every suffix up to the cap is taken. The caller must treat that
+/// as a failure: returning the colliding name instead would hand back a path
+/// that a later `rename` silently overwrites, which is exactly the one thing
+/// this function exists to prevent.
+fn free_name(dir: &Path, file_name: &str) -> Option<PathBuf> {
     let candidate = dir.join(file_name);
     if !candidate.exists() {
-        return candidate;
+        return Some(candidate);
     }
     let p = Path::new(file_name);
     let stem = p.file_stem().and_then(|s| s.to_str()).unwrap_or(file_name);
@@ -22,10 +27,10 @@ fn free_name(dir: &Path, file_name: &str) -> PathBuf {
         };
         let c = dir.join(name);
         if !c.exists() {
-            return c;
+            return Some(c);
         }
     }
-    candidate
+    None
 }
 
 /// Move `path` to the Trash. Reversible from Finder, which is the whole point —
@@ -69,7 +74,8 @@ pub fn move_file(path: String, dir: String) -> Result<String, String> {
         .file_name()
         .and_then(|n| n.to_str())
         .ok_or_else(|| format!("{path}: странное имя файла"))?;
-    let dest = free_name(&dir, name);
+    let dest = free_name(&dir, name)
+        .ok_or_else(|| format!("{}: некуда положить, имя занято", dir.display()))?;
 
     match std::fs::rename(&src, &dest) {
         Ok(()) => {}
@@ -203,11 +209,11 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("lilview-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
 
-        assert_eq!(free_name(&dir, "a.jpg"), dir.join("a.jpg"));
+        assert_eq!(free_name(&dir, "a.jpg"), Some(dir.join("a.jpg")));
         std::fs::write(dir.join("a.jpg"), b"x").unwrap();
-        assert_eq!(free_name(&dir, "a.jpg"), dir.join("a 2.jpg"));
+        assert_eq!(free_name(&dir, "a.jpg"), Some(dir.join("a 2.jpg")));
         std::fs::write(dir.join("a 2.jpg"), b"x").unwrap();
-        assert_eq!(free_name(&dir, "a.jpg"), dir.join("a 3.jpg"));
+        assert_eq!(free_name(&dir, "a.jpg"), Some(dir.join("a 3.jpg")));
 
         std::fs::remove_dir_all(&dir).unwrap();
     }

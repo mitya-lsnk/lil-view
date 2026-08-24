@@ -1,7 +1,7 @@
-"""Build the lil view icon from the lil image one. Needs Pillow.
+"""Build the lil view icon from the lil edit one. Needs Pillow.
 
 Same black rounded square, same fox, same lavender — only the pictogram beside
-the fox changes: lil image's crop marks become a schematic picture (frame, sun,
+the fox changes: lil edit's crop marks become a schematic picture (frame, sun,
 mountains), because that is what this app is for. Keeping the fox pixel-exact
 matters more than redrawing it: the two apps have to read as one family.
 
@@ -12,9 +12,10 @@ from collections import deque
 
 from PIL import Image, ImageDraw
 
-# The 1024px slice of lil image's icns — the largest clean source there is:
-#   iconutil -c iconset ../im-mage/src-tauri/icons/icon.icns -o /tmp/lilimage.iconset
-SRC = "/tmp/lilimage.iconset/icon_512x512@2x.png"
+# The 1024px slice of lil edit's icns — the largest clean source there is.
+# Clone https://github.com/mitya-lsnk/lil-edit, then:
+#   iconutil -c iconset <lil-edit>/src-tauri/icons/icon.icns -o /tmp/liledit.iconset
+SRC = "/tmp/liledit.iconset/icon_512x512@2x.png"
 OUT = "/tmp/lilview-icon-1024.png"  # then: npx tauri icon /tmp/lilview-icon-1024.png
 
 im = Image.open(SRC).convert("RGBA")

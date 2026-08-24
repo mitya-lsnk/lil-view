@@ -30,16 +30,17 @@ export function thumbUrl(path: string, size = 256): string {
 /**
  * Warm the webview's own cache for the neighbours of the current frame, so
  * arrow-key paging shows the next photo immediately instead of decoding on
- * demand. Returns a canceller: dropped requests matter when someone holds the
- * arrow key down and flies past twenty images.
+ * demand.
+ *
+ * There is deliberately no cancellation. Assigning `img.src = ""` does not
+ * abort anything — an empty string resolves against the document URL, so the
+ * browser goes and fetches the page instead. Letting the elements fall out of
+ * scope is both simpler and cheaper: the responses are already on their way and
+ * land in the webview's cache, which is the whole point.
  */
-export function preload(paths: string[], max = 4096): () => void {
-  const imgs = paths.map((p) => {
+export function preload(paths: string[], max = 4096): void {
+  for (const p of paths) {
     const img = new Image();
     img.src = fullUrl(p, max);
-    return img;
-  });
-  return () => {
-    for (const img of imgs) img.src = "";
-  };
+  }
 }
