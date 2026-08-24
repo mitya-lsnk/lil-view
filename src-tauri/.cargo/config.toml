@@ -1,0 +1,8 @@
+# Build into "target.noindex" rather than "target".
+#
+# Spotlight skips any directory whose name ends in .noindex, and nothing else
+# does. Without this, every build leaves a "lil view.app" and a pile of
+# lil-view-<hash> folders in the index, so searching for the app turns up the
+# installed copy mixed with build leftovers.
+[build]
+target-dir = "target.noindex"

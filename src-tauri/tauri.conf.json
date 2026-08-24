@@ -1,0 +1,265 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "lil view",
+  "version": "0.1.0",
+  "identifier": "com.lil.view",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1421",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "lil view",
+        "width": 1180,
+        "height": 800,
+        "minWidth": 720,
+        "minHeight": 520,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' limg: asset: blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self' ipc: http://ipc.localhost limg: blob: data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'",
+      "devCsp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Graphics and Design",
+    "shortDescription": "Fast image viewer",
+    "longDescription": "lil view — open one picture and page through the whole folder. HEIC, RAW, PSD and everything macOS can decode.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "fileAssociations": [
+      {
+        "ext": [
+          "jpg",
+          "jpeg",
+          "jpe",
+          "jfif"
+        ],
+        "name": "JPEG image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/jpeg",
+        "contentTypes": [
+          "public.jpeg"
+        ]
+      },
+      {
+        "ext": [
+          "png"
+        ],
+        "name": "PNG image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/png",
+        "contentTypes": [
+          "public.png"
+        ]
+      },
+      {
+        "ext": [
+          "gif"
+        ],
+        "name": "GIF image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/gif",
+        "contentTypes": [
+          "com.compuserve.gif"
+        ]
+      },
+      {
+        "ext": [
+          "webp"
+        ],
+        "name": "WebP image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/webp",
+        "contentTypes": [
+          "org.webmproject.webp"
+        ]
+      },
+      {
+        "ext": [
+          "avif"
+        ],
+        "name": "AVIF image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/avif",
+        "contentTypes": [
+          "public.avif"
+        ]
+      },
+      {
+        "ext": [
+          "heic",
+          "heif",
+          "heics"
+        ],
+        "name": "HEIF image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/heic",
+        "contentTypes": [
+          "public.heic",
+          "public.heif",
+          "public.heics"
+        ]
+      },
+      {
+        "ext": [
+          "tif",
+          "tiff"
+        ],
+        "name": "TIFF image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/tiff",
+        "contentTypes": [
+          "public.tiff"
+        ]
+      },
+      {
+        "ext": [
+          "bmp",
+          "dib"
+        ],
+        "name": "BMP image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/bmp",
+        "contentTypes": [
+          "com.microsoft.bmp"
+        ]
+      },
+      {
+        "ext": [
+          "ico"
+        ],
+        "name": "Windows icon",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/vnd.microsoft.icon",
+        "contentTypes": [
+          "com.microsoft.ico"
+        ]
+      },
+      {
+        "ext": [
+          "icns"
+        ],
+        "name": "Apple icon",
+        "role": "Viewer",
+        "rank": "Default",
+        "contentTypes": [
+          "com.apple.icns"
+        ]
+      },
+      {
+        "ext": [
+          "svg",
+          "svgz"
+        ],
+        "name": "SVG image",
+        "role": "Viewer",
+        "rank": "Default",
+        "mimeType": "image/svg+xml",
+        "contentTypes": [
+          "public.svg-image"
+        ]
+      },
+      {
+        "ext": [
+          "psd"
+        ],
+        "name": "Photoshop image",
+        "role": "Viewer",
+        "rank": "Default",
+        "contentTypes": [
+          "com.adobe.photoshop-image"
+        ]
+      },
+      {
+        "ext": [
+          "jp2",
+          "j2k",
+          "jpf",
+          "jpx"
+        ],
+        "name": "JPEG 2000 image",
+        "role": "Viewer",
+        "rank": "Default",
+        "contentTypes": [
+          "public.jpeg-2000"
+        ]
+      },
+      {
+        "ext": [
+          "dng",
+          "cr2",
+          "cr3",
+          "crw",
+          "nef",
+          "nrw",
+          "arw",
+          "srf",
+          "sr2",
+          "orf",
+          "raf",
+          "rw2",
+          "pef",
+          "srw",
+          "erf",
+          "3fr",
+          "dcr",
+          "kdc",
+          "mrw",
+          "x3f"
+        ],
+        "name": "Camera raw image",
+        "role": "Viewer",
+        "rank": "Default",
+        "contentTypes": [
+          "public.camera-raw-image",
+          "com.adobe.raw-image",
+          "com.canon.cr2-raw-image",
+          "com.canon.cr3-raw-image",
+          "com.canon.crw-raw-image",
+          "com.nikon.raw-image",
+          "com.nikon.nrw-raw-image",
+          "com.sony.arw-raw-image",
+          "com.sony.raw-image",
+          "com.sony.sr2-raw-image",
+          "com.olympus.raw-image",
+          "com.olympus.or-raw-image",
+          "com.fuji.raw-image",
+          "com.panasonic.raw-image",
+          "com.panasonic.rw2-raw-image",
+          "com.pentax.raw-image",
+          "com.samsung.raw-image",
+          "com.epson.raw-image",
+          "com.hasselblad.3fr-raw-image",
+          "com.konicaminolta.raw-image",
+          "com.sigma.x3f-raw-image",
+          "com.kodak.raw-image"
+        ]
+      }
+    ],
+    "macOS": {
+      "signingIdentity": "-",
+      "hardenedRuntime": false
+    }
+  }
+}

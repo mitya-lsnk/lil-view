@@ -1,0 +1,69 @@
+name: build
+
+# macOS only, on purpose: the viewer decodes through ImageIO and claims file
+# types through LaunchServices, neither of which exists elsewhere. Run it by
+# hand from the Actions tab, or push a tag like v0.1.0 — a tag also publishes a
+# GitHub Release with the .dmg attached.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    # src-tauri/.cargo/config.toml sends the build output to `target.noindex`
+    # so Spotlight ignores the intermediates on a Mac. The env var outranks the
+    # config file, keeping the plain `target/` the globs below are written for.
+    env:
+      CARGO_TARGET_DIR: target
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Test
+        run: |
+          npm run build
+          cd src-tauri && cargo test
+
+      - name: Build app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: "lil view ${{ github.ref_name }}"
+          releaseDraft: false
+          prerelease: false
+          args: --target aarch64-apple-darwin
+
+      # A manual run has no tag and therefore no Release, so expose the
+      # installer as a run artifact too.
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: lil-view-macos
+          if-no-files-found: ignore
+          path: src-tauri/target/**/release/bundle/**/*.dmg

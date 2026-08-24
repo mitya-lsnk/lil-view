@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Merged into the generated Info.plist by the macOS bundler.
+
+  macOS gates the Desktop, Documents, Downloads and any removable or network
+  volume behind a consent prompt, and a viewer reads exactly those places. The
+  strings below are what that prompt shows as the reason; without them the
+  system asks anyway, but with no explanation, and a refusal comes back to us as
+  a bare "Operation not permitted".
+-->
+<plist version="1.0">
+<dict>
+  <key>NSDesktopFolderUsageDescription</key>
+  <string>Чтобы открывать и листать изображения с рабочего стола.</string>
+  <key>NSDocumentsFolderUsageDescription</key>
+  <string>Чтобы открывать и листать изображения из папки «Документы».</string>
+  <key>NSDownloadsFolderUsageDescription</key>
+  <string>Чтобы открывать и листать изображения из папки «Загрузки».</string>
+  <key>NSRemovableVolumesUsageDescription</key>
+  <string>Чтобы открывать изображения с флешек и внешних дисков.</string>
+  <key>NSNetworkVolumesUsageDescription</key>
+  <string>Чтобы открывать изображения с сетевых дисков.</string>
+</dict>
+</plist>

@@ -1,0 +1,38 @@
+[package]
+name = "lil-view"
+version = "0.1.0"
+description = "lil view — fast local image viewer"
+authors = ["lsnk"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+# The `_lib` suffix keeps the lib name distinct from the bin name (a Windows
+# quirk, see rust-lang/cargo#8519). Kept even though v1 is macOS-only.
+name = "lil_view_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+percent-encoding = "2"
+
+# macOS does the heavy lifting: ImageIO decodes/encodes every format the system
+# knows (HEIC, RAW, PSD, TIFF…) and LaunchServices owns the file associations.
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.10"
+core-foundation-sys = "0.8"
+core-graphics = "0.25"
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", features = ["NSFileManager", "NSURL", "NSString", "NSError", "NSArray", "NSData"] }
+objc2-app-kit = { version = "0.3", features = ["NSPasteboard", "NSPasteboardItem"] }
+
+# Fallback decoder for platforms without ImageIO. Not used on macOS.
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif", "bmp", "tiff"] }
