@@ -16,14 +16,18 @@ jobs:
     permissions:
       contents: write
 
-    # src-tauri/.cargo/config.toml sends the build output to `target.noindex`
-    # so Spotlight ignores the intermediates on a Mac. The env var outranks the
-    # config file, keeping the plain `target/` the globs below are written for.
-    env:
-      CARGO_TARGET_DIR: target
 
     steps:
       - uses: actions/checkout@v4
+
+      # The local `.cargo/config.toml` redirects builds into `target.noindex` so
+      # Spotlight ignores the intermediates on a Mac. On a runner that only
+      # causes trouble: tauri-action resolves where the bundles landed from
+      # cargo's own metadata, and an override makes the two disagree — the build
+      # succeeds and then reports "No artifacts were found".
+      - name: Use the default target directory
+        run: rm -f src-tauri/.cargo/config.toml
+
 
       - name: Set up Node
         uses: actions/setup-node@v4

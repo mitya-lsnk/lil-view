@@ -11,7 +11,9 @@ mod suite;
 
 use std::sync::Mutex;
 
-use tauri::{Emitter, Manager, RunEvent};
+#[cfg(target_os = "macos")]
+use tauri::{Emitter, RunEvent};
+use tauri::Manager;
 
 /// Files Finder asked us to open before the webview was ready.
 ///
@@ -96,8 +98,13 @@ pub fn run() {
 
     // `build` + `run` rather than the one-shot `run()`, because `RunEvent` is
     // the only place macOS delivers "open these documents".
-    app.run(|app, event| {
-        if let RunEvent::Opened { urls } = event {
+    //
+    // `RunEvent::Opened` is a macOS/iOS-only variant — elsewhere it does not
+    // exist at all, so the arm has to be compiled out rather than left
+    // unmatched, or a non-macOS build fails to compile.
+    app.run(|_app, _event| {
+        #[cfg(target_os = "macos")]
+        if let RunEvent::Opened { urls } = _event {
             let paths: Vec<String> = urls
                 .iter()
                 .filter_map(|u| u.to_file_path().ok())
@@ -106,12 +113,12 @@ pub fn run() {
             if paths.is_empty() {
                 return;
             }
-            app.state::<Pending>()
+            _app.state::<Pending>()
                 .0
                 .lock()
                 .unwrap()
                 .extend(paths.iter().cloned());
-            let _ = app.emit("open-files", paths);
+            let _ = _app.emit("open-files", paths);
         }
     });
 }
