@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { assocStatus, restoreHandlers, setDefaultHandler, type AssocReport } from "../lib/folder";
 import { hasTauri } from "../lib/tauri";
 import { useStrings } from "../lib/i18n";
+import { Icon } from "./Icon";
 
 /**
  * "Open every image in lil view."
@@ -90,7 +91,9 @@ export function AssocCard() {
         <div className="assoc-list">
           {report.items.map((it) => (
             <div className={`assoc-item ${it.ok ? "ok" : "no"}`} key={it.uti}>
-              <span className="mark">{it.ok ? "✓" : "✗"}</span>
+              <span className="mark">
+                <Icon name={it.ok ? "ok" : "close"} size={13} />
+              </span>
               <span className="exts">{it.exts.join(", ")}</span>
               <span className="who" title={it.handler ?? undefined}>
                 {it.ok ? s.assoc.weAre : (it.handler ?? s.assoc.unknownHandler)}

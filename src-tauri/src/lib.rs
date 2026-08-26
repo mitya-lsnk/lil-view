@@ -1,4 +1,3 @@
-#[cfg(target_os = "macos")]
 mod assoc;
 mod exif;
 mod fileops;
@@ -6,6 +5,7 @@ mod fileops;
 mod imageio;
 mod proto;
 mod scan;
+mod update;
 #[cfg(target_os = "macos")]
 mod suite;
 
@@ -48,6 +48,7 @@ macro_rules! command_handler {
             take_pending_open,
             cache_bytes,
             clear_cache,
+            update::check_update,
             scan::open_path,
             exif::image_info,
             fileops::trash_file,
@@ -74,6 +75,7 @@ macro_rules! command_handler {
             take_pending_open,
             cache_bytes,
             clear_cache,
+            update::check_update,
             scan::open_path,
             exif::image_info,
             fileops::trash_file,

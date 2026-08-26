@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { ModeToggle } from "./ModeToggle";
 import { LanguagePicker } from "./LanguagePicker";
 import { useStrings } from "../lib/i18n";
@@ -47,10 +48,10 @@ export function Toolbar(p: Props) {
       <span className="tb-sep" />
 
       <button className="tb-btn" onClick={p.onPrev} disabled={!p.canPrev} title={s.toolbar.prev}>
-        ◀
+        <Icon name="prev" />
       </button>
       <button className="tb-btn" onClick={p.onNext} disabled={!p.canNext} title={s.toolbar.next}>
-        ▶
+        <Icon name="next" />
       </button>
 
       <span className="tb-title">{p.title}</span>
@@ -60,10 +61,10 @@ export function Toolbar(p: Props) {
         onClick={p.onToggleFilmstrip}
         title={s.toolbar.filmstrip}
       >
-        ▤
+        <Icon name="filmstrip" />
       </button>
       <button className={`tb-btn ${p.grid ? "on" : ""}`} onClick={p.onToggleGrid} title={s.toolbar.grid}>
-        ▦
+        <Icon name="grid" />
       </button>
       <button
         className={`tb-btn ${p.slideshow ? "on" : ""}`}
@@ -71,7 +72,7 @@ export function Toolbar(p: Props) {
         disabled={!p.hasImage}
         title={s.toolbar.slideshow}
       >
-        ▶︎
+        <Icon name="slideshow" />
       </button>
       <button
         className={`tb-btn ${p.info ? "on" : ""}`}
@@ -79,10 +80,10 @@ export function Toolbar(p: Props) {
         disabled={!p.hasImage}
         title={s.toolbar.info}
       >
-        ⓘ
+        <Icon name="info" />
       </button>
       <button className="tb-btn" onClick={p.onFullscreen} disabled={!p.hasImage} title={s.toolbar.fullscreen}>
-        ⛶
+        <Icon name="fullscreen" />
       </button>
       <button
         className="tb-btn"
@@ -94,7 +95,7 @@ export function Toolbar(p: Props) {
           p.onMore(r.left, r.bottom + 4);
         }}
       >
-        ⋯
+        <Icon name="more" />
       </button>
 
       {/* Always shown, installed or not. When it isn't, the button is drawn
@@ -106,7 +107,7 @@ export function Toolbar(p: Props) {
         disabled={!p.hasImage}
         title={p.suiteReady ? s.toolbar.sendToImage : s.toolbar.sendToImageMissing}
       >
-        ✎
+        <Icon name="edit" />
       </button>
 
       <span className="tb-sep" />
@@ -114,7 +115,7 @@ export function Toolbar(p: Props) {
       <ModeToggle />
       <LanguagePicker />
       <button className="tb-btn" onClick={p.onSettings} title={s.toolbar.settings}>
-        ⚙
+        <Icon name="settings" />
       </button>
     </div>
   );

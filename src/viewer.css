@@ -721,23 +721,18 @@
   height: 100%;
   border-radius: calc(var(--radius-sm) - 2px);
 }
-.mode-toggle,
-.lang-toggle {
-  min-width: var(--ctl-h-head);
+/* The language and light/dark switches are plain `b-btn`s, the same primitive
+   the rest of the suite uses, cut down to toolbar height here. They used to be
+   two bespoke classes with their own hover and no resting shadow, so a row of
+   controls had two that answered the same gesture differently. */
+.toolbar .b-btn,
+.screen-head .b-btn {
   height: var(--ctl-h-head);
-  padding: 0 8px;
-  font-family: var(--font-mono);
+  min-width: var(--ctl-h-head);
+  padding: 0 10px;
   font-size: 12px;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--surface);
-  border: var(--bd-w) solid var(--line);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-.mode-toggle:hover,
-.lang-toggle:hover {
-  background: var(--surface-2);
+  justify-content: center;
+  line-height: 1;
 }
 
 /* -------------------------------------------------------------------- toast */
@@ -778,4 +773,220 @@
     animation-duration: 0.001s !important;
     transition-duration: 0.001s !important;
   }
+}
+
+
+/* ------------------------------------------------------- settings: the shell */
+
+.screen-sp {
+  flex: 1;
+}
+.screen-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Light and dark, said out loud. The toolbar toggle is one unlabelled button
+   that flips between two states — right for mid-session, wrong as the only
+   place the setting exists. */
+.mode-choice {
+  display: inline-flex;
+  align-self: flex-start;
+  border: var(--bd-w) solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.mode-choice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+.mode-choice-btn:hover {
+  color: var(--ink);
+}
+.mode-choice-btn.on {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* --------------------------------------------------- what a skin looks like */
+
+.sp {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--surface-2);
+  border: var(--bd-w) solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.sp-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sp-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+}
+.sp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sp-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: var(--bd-w) solid var(--line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.sp-chip.on {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.sp-chip.muted {
+  border-style: dashed;
+  color: var(--muted);
+}
+.sp-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.sp-bar {
+  height: 8px;
+  border: var(--bd-w) solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  overflow: hidden;
+}
+.sp-bar-fill {
+  display: block;
+  width: 62%;
+  height: 100%;
+  background: var(--accent);
+}
+
+/* ------------------------------------------------------------- checkboxes */
+
+/* Left native, these draw macOS blue — a colour in none of the four skins, and
+   nearly invisible on the dark ones. */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border: var(--bd-w) solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+}
+input[type="checkbox"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  /* Follows the box. The skins set their own corner radius, and a square mark
+     inside a round box reads as a bug. */
+  border-radius: inherit;
+  transform: scale(0);
+  background: var(--accent-ink);
+  transition: transform var(--dur) var(--ease);
+}
+input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+input[type="checkbox"]:focus-visible {
+  outline: var(--bd-w) solid var(--accent-3);
+  outline-offset: 2px;
+}
+
+/* Respect the system setting: every animation here decorates state that is
+   already legible without it. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------- app updates */
+
+.upd {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.upd-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.upd-ver {
+  font-size: 11px;
+  color: var(--muted);
+}
+.upd-note {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.upd-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: var(--bd-w) solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+.upd-head {
+  font-size: 12px;
+  font-weight: 700;
+}
+.upd-notes summary {
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.upd-notes pre {
+  margin: 8px 0 0;
+  max-height: 220px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.upd-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
 }

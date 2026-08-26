@@ -6,7 +6,7 @@ export function LanguagePicker() {
   const next = lang === "ru" ? "en" : "ru";
   return (
     <button
-      className="lang-toggle"
+      className="b-btn b-mono"
       onClick={() => setLang(next)}
       title={`${s.lang.label}: ${lang === "ru" ? s.lang.ru : s.lang.en}`}
       aria-label={`${s.lang.label} — ${lang === "ru" ? s.lang.en : s.lang.ru}`}

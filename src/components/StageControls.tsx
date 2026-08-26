@@ -1,4 +1,5 @@
 import { useStrings } from "../lib/i18n";
+import { Icon } from "./Icon";
 
 /**
  * Zoom and rotation, floated over the bottom-right of the picture.
@@ -28,14 +29,14 @@ export function StageControls({
   return (
     <div className="stage-ctl">
       <button className="sc-btn" onClick={() => onRotate(-1)} title={s.toolbar.rotateLeft}>
-        ↺
+        <Icon name="rotateLeft" size={15} />
       </button>
       <button className="sc-btn" onClick={() => onRotate(1)} title={s.toolbar.rotateRight}>
-        ↻
+        <Icon name="rotateRight" size={15} />
       </button>
       <span className="sc-sep" />
       <button className="sc-btn" onClick={onZoomOut} title={s.toolbar.zoomOut}>
-        −
+        <Icon name="minus" size={15} />
       </button>
       <button
         className="sc-btn sc-zoom"
@@ -45,7 +46,7 @@ export function StageControls({
         {Math.round(zoom * 100)}%
       </button>
       <button className="sc-btn" onClick={onZoomIn} title={s.toolbar.zoomIn}>
-        +
+        <Icon name="plus" size={15} />
       </button>
     </div>
   );
