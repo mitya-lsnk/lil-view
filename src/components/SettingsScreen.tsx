@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { AssocCard } from "./AssocCard";
 import { Icon } from "./Icon";
-import { SkinPicker } from "./SkinPicker";
+import { SkinCards } from "./SkinCards";
 import { SkinPreview } from "./SkinPreview";
 import { UpdatePanel } from "./UpdatePanel";
 import { ModeChoice } from "./ModeToggle";
@@ -97,9 +97,9 @@ export function SettingsScreen({
               <span>{s.settings.mode}</span>
               <ModeChoice label={s.settings.mode} />
             </div>
-            <div className="field">
+            <div className="field field--stack">
               <span>{s.settings.skin}</span>
-              <SkinPicker />
+              <SkinCards />
             </div>
             <div className="field">
               <span>{s.settings.language}</span>
