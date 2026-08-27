@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 
+import { AppearancePanel } from "./AppearancePanel";
 import { AssocCard } from "./AssocCard";
 import { Icon } from "./Icon";
-import { SkinCards } from "./SkinCards";
-import { SkinPreview } from "./SkinPreview";
 import { UpdatePanel } from "./UpdatePanel";
-import { ModeChoice } from "./ModeToggle";
 import { LanguagePicker } from "./LanguagePicker";
 import { cacheBytes, clearCache } from "../lib/folder";
 import { humanBytes } from "../lib/format";
@@ -90,22 +88,8 @@ export function SettingsScreen({
           {tab === "files" && <AssocCard />}
 
           {tab === "look" && (
-          <div className="card">
-            <h2>{s.settings.appearance}</h2>
-            <p>{s.settings.appearanceHint}</p>
-            <div className="field">
-              <span>{s.settings.mode}</span>
-              <ModeChoice label={s.settings.mode} />
-            </div>
-            <div className="field field--stack">
-              <span>{s.settings.skin}</span>
-              <SkinCards />
-            </div>
-            <div className="field">
-              <span>{s.settings.language}</span>
-              <LanguagePicker />
-            </div>
-            <SkinPreview
+            <>
+            <AppearancePanel
               name="lil view"
               words={{
                 primary: s.app.openBtn,
@@ -114,7 +98,13 @@ export function SettingsScreen({
                 check: s.settings.loop,
               }}
             />
-          </div>
+            <div className="card">
+              <div className="field">
+                <span>{s.settings.language}</span>
+                <LanguagePicker />
+              </div>
+            </div>
+            </>
           )}
 
           {tab === "viewing" && (
