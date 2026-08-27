@@ -4,6 +4,15 @@ The three apps share one drawing — same fox, same rounded square, same
 pictogram — and differ only in ink, so the Dock tells them apart at a glance
 while they still read as one family.
 
+Point it at **this app's own** icon, not lil edit's. They share the fox and the
+square but not the pictogram, and running it on the wrong source silently
+replaces the picture with lil edit's crop marks — which looks like a colour
+change until someone opens the Dock.
+
+    iconutil -c iconset src-tauri/icons/icon.icns -o /tmp/lv.iconset
+    python tools/recolour-icon.py /tmp/lv.iconset/icon_512x512@2x.png /tmp/out.png 145
+    npx tauri icon /tmp/out.png
+
 **Hue rotation in HLS, not a multiply.** The original ink is not one flat
 colour: it runs from L 0.77 at the top of the fox to L 0.65 at the bottom, and
 that fall is most of what makes the icon look drawn rather than stamped.
