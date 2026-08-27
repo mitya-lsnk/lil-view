@@ -41,7 +41,8 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin
+          # Both, so the build below can lipo them into one file.
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
 
       - name: Cache Rust
         uses: swatinem/rust-cache@v2
@@ -65,7 +66,11 @@ jobs:
           releaseName: "lil view ${{ github.ref_name }}"
           releaseDraft: false
           prerelease: false
-          args: --target aarch64-apple-darwin
+          # One download for every Mac. The arm64-only build left Intel owners
+          # with nothing at all, which is a worse answer than a slightly larger
+          # file — and the macos-13 runners that would build their slice
+          # separately are all but gone.
+          args: --target universal-apple-darwin
 
       # A manual run has no tag and therefore no Release, so expose the
       # installer as a run artifact too.
