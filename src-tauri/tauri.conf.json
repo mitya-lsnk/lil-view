@@ -261,7 +261,6 @@
       "signingIdentity": "-",
       "hardenedRuntime": false,
       "dmg": {
-        "background": "dmg/background.png",
         "windowSize": {
           "width": 660,
           "height": 400
