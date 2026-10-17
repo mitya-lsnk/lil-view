@@ -33,6 +33,8 @@ export const RU = {
     more: "Ещё",
     sendToImage: "Открыть в lil edit",
     sendToImageMissing: "lil edit не установлен",
+    sendTo: "Отправить в папку",
+    sendToEmpty: "Папки для отправки не заданы",
   },
   status: {
     of: "из",
@@ -76,6 +78,22 @@ export const RU = {
     saved: (name: string) => `Сохранено: ${name}`,
     cancel: "Отмена",
     ok: "Хорошо",
+  },
+  send: {
+    title: "Отправить в…",
+    hint:
+      "Выбери папки, и цифры 1–9 будут класть туда копию текущего снимка. " +
+      "Оригинал остаётся на месте, так что папка, которую листаешь, не меняется под руками.",
+    slot: (n: number) => `Клавиша ${n}`,
+    pick: "Выбрать папку…",
+    change: "Сменить",
+    clear: "Убрать",
+    labelPlaceholder: "Название (необязательно)",
+    advance: "Переходить к следующему снимку",
+    notSet: "не задана",
+    configure: "Настроить папки…",
+    sent: (name: string, where: string) => `«${name}» → ${where}`,
+    noSlot: (n: number) => `На цифре ${n} папка не задана`,
   },
   settings: {
     title: "Настройки",
@@ -202,6 +220,8 @@ export const EN: Dict = {
     more: "More",
     sendToImage: "Open in lil edit",
     sendToImageMissing: "lil edit isn’t installed",
+    sendTo: "Send to folder",
+    sendToEmpty: "No send-to folders set up",
   },
   status: {
     of: "of",
@@ -245,6 +265,23 @@ export const EN: Dict = {
     saved: (name: string) => `Saved: ${name}`,
     cancel: "Cancel",
     ok: "OK",
+  },
+  send: {
+    title: "Send to…",
+    hint:
+      "Pick some folders and the 1–9 keys will drop a copy of the current " +
+      "picture into them. The original stays put, so the folder you're paging " +
+      "through doesn't change under your hands.",
+    slot: (n: number) => `Key ${n}`,
+    pick: "Choose a folder…",
+    change: "Change",
+    clear: "Clear",
+    labelPlaceholder: "Name (optional)",
+    advance: "Move on to the next picture",
+    notSet: "not set",
+    configure: "Set up folders…",
+    sent: (name: string, where: string) => `“${name}” → ${where}`,
+    noSlot: (n: number) => `No folder on key ${n}`,
   },
   settings: {
     title: "Settings",

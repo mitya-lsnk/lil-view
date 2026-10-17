@@ -62,11 +62,12 @@ fn trash_impl(path: &Path) -> Result<(), String> {
     ))
 }
 
-/// Move a file into `dir`, returning the new path.
-#[tauri::command]
-pub fn move_file(path: String, dir: String) -> Result<String, String> {
-    let src = PathBuf::from(&path);
-    let dir = PathBuf::from(&dir);
+/// Work out where `path` should land inside `dir`, without touching anything.
+///
+/// Shared by move and copy so the two can never disagree about collisions.
+fn destination_in(path: &str, dir: &str) -> Result<(PathBuf, PathBuf), String> {
+    let src = PathBuf::from(path);
+    let dir = PathBuf::from(dir);
     if !dir.is_dir() {
         return Err(format!("{}: не папка", dir.display()));
     }
@@ -76,6 +77,25 @@ pub fn move_file(path: String, dir: String) -> Result<String, String> {
         .ok_or_else(|| format!("{path}: странное имя файла"))?;
     let dest = free_name(&dir, name)
         .ok_or_else(|| format!("{}: некуда положить, имя занято", dir.display()))?;
+    Ok((src, dest))
+}
+
+/// Copy a file into `dir`, returning the new path.
+///
+/// This is what the "send to…" shortcuts use. Copying rather than moving keeps
+/// the folder being browsed stable: nothing renumbers under the hand, so you
+/// can mark a picture and keep paging.
+#[tauri::command]
+pub fn copy_file(path: String, dir: String) -> Result<String, String> {
+    let (src, dest) = destination_in(&path, &dir)?;
+    std::fs::copy(&src, &dest).map_err(|e| format!("{}: {e}", dest.display()))?;
+    Ok(dest.to_string_lossy().to_string())
+}
+
+/// Move a file into `dir`, returning the new path.
+#[tauri::command]
+pub fn move_file(path: String, dir: String) -> Result<String, String> {
+    let (src, dest) = destination_in(&path, &dir)?;
 
     match std::fs::rename(&src, &dest) {
         Ok(()) => {}
@@ -203,6 +223,36 @@ fn convert_impl(src: &Path, _uti: &str, _q: Option<f64>) -> Result<Vec<u8>, Stri
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Copy must leave the original where it was — the whole reason "send to…"
+    /// copies instead of moving is that the folder you're paging through has to
+    /// stay put.
+    #[test]
+    fn copying_leaves_the_original_alone() {
+        let root = std::env::temp_dir().join(format!("lilview-copy-{}", std::process::id()));
+        let from = root.join("from");
+        let to = root.join("to");
+        std::fs::create_dir_all(&from).unwrap();
+        std::fs::create_dir_all(&to).unwrap();
+        let src = from.join("a.jpg");
+        std::fs::write(&src, b"pixels").unwrap();
+
+        let dest = copy_file(src.to_string_lossy().into(), to.to_string_lossy().into()).unwrap();
+        assert!(src.exists(), "original must survive");
+        assert_eq!(std::fs::read(&dest).unwrap(), b"pixels");
+
+        // Sending the same picture twice doesn't overwrite the first copy.
+        let again = copy_file(src.to_string_lossy().into(), to.to_string_lossy().into()).unwrap();
+        assert_ne!(dest, again);
+        assert!(Path::new(&dest).exists() && Path::new(&again).exists());
+
+        std::fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[test]
+    fn copying_into_something_that_is_not_a_folder_fails() {
+        assert!(copy_file("/etc/hosts".into(), "/etc/hosts".into()).is_err());
+    }
 
     #[test]
     fn collisions_get_a_suffix_instead_of_overwriting() {

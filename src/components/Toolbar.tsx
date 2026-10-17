@@ -32,6 +32,8 @@ interface Props {
   onMore: (x: number, y: number) => void;
   /** Is the sibling editor actually installed? */
   suiteReady: boolean;
+  /** Opens the list of send-to folders, anchored under the button. */
+  onSendTo: (x: number, y: number) => void;
   onSendToSuite: () => void;
   onSettings: () => void;
 }
@@ -85,6 +87,21 @@ export function Toolbar(p: Props) {
       <button className="tb-btn" onClick={p.onFullscreen} disabled={!p.hasImage} title={s.toolbar.fullscreen}>
         <Icon name="fullscreen" />
       </button>
+      {/* Always present, even with no folders set up — the menu then offers to
+          set them up. A control that appears only once it's configured is one
+          nobody discovers. */}
+      <button
+        className="tb-btn"
+        disabled={!p.hasImage}
+        title={s.toolbar.sendTo}
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          p.onSendTo(r.left, r.bottom + 4);
+        }}
+      >
+        <Icon name="folder" />
+      </button>
+
       <button
         className="tb-btn"
         disabled={!p.hasImage}

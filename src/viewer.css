@@ -1114,3 +1114,85 @@ input[type="checkbox"]:focus-visible {
 .ap .sp {
   margin-top: 0;
 }
+
+/* ------------------------------------------------------ send-to slots */
+
+.slots {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 0 14px;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px;
+  border: var(--bd-w) solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.slot.filled {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* The digit is the feature, so it gets the weight of a key cap. */
+.slot-key {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  border: 1px solid color-mix(in srgb, var(--muted) 45%, transparent);
+  border-radius: 5px;
+}
+.slot.filled .slot-key {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.slot-label {
+  flex: 0 0 34%;
+  min-width: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 2px 0;
+}
+.slot-label:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+.slot-label.muted {
+  color: var(--muted);
+}
+
+/* The path is reference, not something to read every time: it shrinks first
+   and clips from the left, where the interesting end isn't. */
+.slot-path {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  text-align: left;
+}
+
+.slot .tb-btn {
+  flex: 0 0 auto;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 7px;
+}

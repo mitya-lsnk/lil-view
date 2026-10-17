@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { AppearancePanel } from "./AppearancePanel";
 import { AssocCard } from "./AssocCard";
+import { SendSlots } from "./SendSlots";
 import { Icon } from "./Icon";
 import { UpdatePanel } from "./UpdatePanel";
 import { LanguagePicker } from "./LanguagePicker";
@@ -85,7 +86,12 @@ export function SettingsScreen({
 
       <div className="screen-body">
         <div className="screen-inner">
-          {tab === "files" && <AssocCard />}
+          {tab === "files" && (
+            <>
+              <AssocCard />
+              <SendSlots prefs={prefs} set={set} />
+            </>
+          )}
 
           {tab === "look" && (
             <>

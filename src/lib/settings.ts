@@ -12,6 +12,25 @@ export type ZoomMode = "fit" | "actual" | "fitLarge";
 export type WheelMode = "zoom" | "pan";
 export type SortBy = "name" | "date" | "size";
 
+/**
+ * A "send to…" destination, bound to a number key.
+ *
+ * Nine of them because that's how many digits there are to press; most people
+ * will fill one. An empty `path` means the slot is unused — the array always
+ * has `SEND_SLOTS` entries so a slot keeps its digit when a neighbour is
+ * cleared.
+ */
+export interface SendSlot {
+  path: string;
+  /** What to call it in the menu. Falls back to the folder's own name. */
+  label: string;
+}
+
+export const SEND_SLOTS = 9;
+
+export const emptySlots = (): SendSlot[] =>
+  Array.from({ length: SEND_SLOTS }, () => ({ path: "", label: "" }));
+
 export interface Prefs {
   zoom: ZoomMode;
   wheel: WheelMode;
@@ -21,6 +40,10 @@ export interface Prefs {
   loop: boolean;
   shuffle: boolean;
   filmstrip: boolean;
+  /** Destinations for the number keys. Always `SEND_SLOTS` long. */
+  sendSlots: SendSlot[];
+  /** Move on to the next picture after sending one. */
+  sendAdvances: boolean;
 }
 
 export const DEFAULTS: Prefs = {
@@ -37,9 +60,32 @@ export const DEFAULTS: Prefs = {
   loop: true,
   shuffle: false,
   filmstrip: true,
+  sendSlots: emptySlots(),
+  // Sending is something you do *while* going through a folder, so the hand
+  // shouldn't have to come back to the arrow key between every two pictures.
+  sendAdvances: true,
 };
 
 const KEY = "lilview.prefs";
+
+/**
+ * Force whatever was stored into exactly `SEND_SLOTS` well-formed entries.
+ *
+ * The digits are positional: slot 3 must stay on the 3 key even after slot 2 is
+ * cleared, so a short, long or ragged array is padded and trimmed rather than
+ * used as-is.
+ */
+function normaliseSlots(stored: unknown): SendSlot[] {
+  const out = emptySlots();
+  if (!Array.isArray(stored)) return out;
+  for (let i = 0; i < SEND_SLOTS; i++) {
+    const v = stored[i] as Partial<SendSlot> | undefined;
+    if (v && typeof v.path === "string") {
+      out[i] = { path: v.path, label: typeof v.label === "string" ? v.label : "" };
+    }
+  }
+  return out;
+}
 
 export function readPrefs(): Prefs {
   try {
@@ -55,6 +101,7 @@ export function readPrefs(): Prefs {
     if (merged.wheel !== "zoom" && merged.wheel !== "pan") merged.wheel = DEFAULTS.wheel;
     if (!["fit", "actual", "fitLarge"].includes(merged.zoom)) merged.zoom = DEFAULTS.zoom;
     if (!["name", "date", "size"].includes(merged.sort)) merged.sort = DEFAULTS.sort;
+    merged.sendSlots = normaliseSlots(parsed.sendSlots);
     return merged;
   } catch {
     return DEFAULTS;

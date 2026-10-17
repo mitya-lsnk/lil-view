@@ -24,6 +24,7 @@ import { usePrefs } from "./lib/settings";
 import { useStrings } from "./lib/i18n";
 import { hasTauri } from "./lib/tauri";
 import {
+  copyFile,
   copyImage,
   copyPath,
   moveFile,
@@ -67,6 +68,7 @@ export default function App() {
   const [toast, setToast] = useState<{ msg: string; kind: "info" | "error" } | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
+  const [sendAt, setSendAt] = useState<{ x: number; y: number } | null>(null);
   const [suite, setSuite] = useState<SuiteApp[]>([]);
 
   const stageRef = useRef<StageHandle>(null);
@@ -305,6 +307,42 @@ export default function App() {
     }
   }, [current, entries, folder, index, load, s.actions, say]);
 
+  /**
+   * Drop a copy of the current picture into slot `n` (1-based) and move on.
+   *
+   * A copy, not a move: the folder being browsed has to stay still, or every
+   * send would renumber what's left and the next key press would land on a
+   * different photo than the one you were looking at.
+   */
+  const sendToSlot = useCallback(
+    async (n: number) => {
+      if (!current || !hasTauri()) return;
+      const slot = prefs.sendSlots[n - 1];
+      if (!slot?.path) {
+        say(s.send.noSlot(n), "error");
+        return;
+      }
+      const sent = current;
+      try {
+        await copyFile(sent.path, slot.path);
+        say(s.send.sent(sent.name, slot.label || splitPath(slot.path).name));
+        if (prefs.sendAdvances) page(1);
+      } catch (e) {
+        say(String(e), "error");
+      }
+    },
+    [current, page, prefs.sendAdvances, prefs.sendSlots, s.send, say],
+  );
+
+  /** Slots with a folder behind them, keeping their digit. */
+  const activeSlots = useMemo(
+    () =>
+      prefs.sendSlots
+        .map((slot, i) => ({ ...slot, key: i + 1 }))
+        .filter((slot) => slot.path),
+    [prefs.sendSlots],
+  );
+
   const doSaveAs = useCallback(async () => {
     if (!current || !hasTauri()) return;
     const { name } = splitPath(current.path);
@@ -396,11 +434,28 @@ export default function App() {
         case "-":
           stageRef.current?.zoomOut();
           break;
+        // 1–9 send to a folder. Zoom used to hold 0 and 1; it keeps 0, which
+        // now toggles between fit and 1:1 the way the on-screen readout does.
+        // Digits are the obvious place for "slot N", and + / − still zoom.
         case "0":
-          stageRef.current?.actual();
+          if (zoom === 1) stageRef.current?.fit();
+          else stageRef.current?.actual();
           break;
         case "1":
-          stageRef.current?.fit();
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+          // Not while Settings is open: the digits belong to the slot editor
+          // there, and sending a photo from a screen that isn't showing one is
+          // an action with no visible cause.
+          if (settings) break;
+          e.preventDefault();
+          void sendToSlot(Number(e.key));
           break;
         case "Escape":
           // One key, ordered by how trapped each state feels.
@@ -437,7 +492,8 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [
     current, doSaveAs, doTrash, entries.length, grid, immersive, info, page, pickFile,
-    prefs.filmstrip, s.actions, say, set, settings, slideshow, toggleImmersive,
+    prefs.filmstrip, s.actions, say, sendToSlot, set, settings, slideshow, toggleImmersive,
+    zoom,
   ]);
 
   // Whichever copy of the sibling editor is installed — see SUITE in suite.rs
@@ -471,6 +527,24 @@ export default function App() {
       { label: s.actions.trash, hint: "⌘⌫", danger: true, run: () => void doTrash() },
     ];
   }, [current, doMove, doSaveAs, doTrash, s.actions, say]);
+
+  /** The send menu: one row per configured folder, or a way to configure one. */
+  const sendActions: Action[] = useMemo(() => {
+    if (!activeSlots.length) {
+      return [
+        {
+          label: s.toolbar.sendToEmpty,
+          hint: s.send.configure,
+          run: () => setSettings(true),
+        },
+      ];
+    }
+    return activeSlots.map((slot) => ({
+      label: slot.label || splitPath(slot.path).name,
+      hint: String(slot.key),
+      run: () => void sendToSlot(slot.key),
+    }));
+  }, [activeSlots, s.send.configure, s.toolbar.sendToEmpty, sendToSlot]);
 
   // ---------------------------------------------------------------- render
 
@@ -514,6 +588,7 @@ export default function App() {
         onToggleSlideshow={() => setSlideshow((v) => !v)}
         onFullscreen={toggleImmersive}
         suiteReady={!!lilEdit}
+        onSendTo={(x, y) => setSendAt({ x, y })}
         onSendToSuite={sendToSuite}
         onMore={(x, y) => {
           setMenuAt({ x, y });
@@ -622,6 +697,10 @@ export default function App() {
           natural={natural}
           zoom={zoom}
         />
+      )}
+
+      {sendAt && (
+        <ActionsMenu x={sendAt.x} y={sendAt.y} actions={sendActions} onClose={() => setSendAt(null)} />
       )}
 
       {menuAt && actions.length > 0 && (

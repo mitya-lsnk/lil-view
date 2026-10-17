@@ -42,6 +42,8 @@ export function imageInfo(path: string): Promise<ImageInfo> {
 
 export const trashFile = (path: string) => call<void>("trash_file", { path });
 export const moveFile = (path: string, dir: string) => call<string>("move_file", { path, dir });
+/** Used by the "send to…" shortcuts — the original stays where it is. */
+export const copyFile = (path: string, dir: string) => call<string>("copy_file", { path, dir });
 export const revealInFinder = (path: string) => call<void>("reveal_in_finder", { path });
 export const copyPath = (path: string) => call<void>("copy_path_to_clipboard", { path });
 export const copyImage = (path: string) => call<void>("copy_image_to_clipboard", { path });
